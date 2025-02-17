@@ -8,6 +8,8 @@ static const BOOL _ExtractFunctionSNN(void* functionAddress, int* pSSN, void** p
 {
 	WORD cw;
 	void** ntdllAddresses;
+	char* syscallHash;
+	unsigned char buffer[8];
 
 	cw = 0;
 	ntdllAddresses = (void**)malloc(sizeof(void*) * (NTDLL_JUMPS_COUNT + 1));
@@ -29,12 +31,19 @@ static const BOOL _ExtractFunctionSNN(void* functionAddress, int* pSSN, void** p
 		// First opcodes should be :
 		//    MOV R10, RCX
 		//    MOV RCX, <syscall>
-		if (*((PBYTE)functionAddress + cw) == 0x4c
-			&& *((PBYTE)functionAddress + 1 + cw) == 0x8b
-			&& *((PBYTE)functionAddress + 2 + cw) == 0xd1
-			&& *((PBYTE)functionAddress + 3 + cw) == 0xb8
-			&& *((PBYTE)functionAddress + 6 + cw) == 0x00
-			&& *((PBYTE)functionAddress + 7 + cw) == 0x00) {
+		
+		// Obfuscated way of checking the following :
+		//if (*((PBYTE)functionAddress + cw) == 0x4c
+		//	&& *((PBYTE)functionAddress + 1 + cw) == 0x8b
+		//	&& *((PBYTE)functionAddress + 2 + cw) == 0xd1
+		//	&& *((PBYTE)functionAddress + 3 + cw) == 0xb8
+		//	&& *((PBYTE)functionAddress + 6 + cw) == 0x00
+		//	&& *((PBYTE)functionAddress + 7 + cw) == 0x00) {
+		drunk_memcpy(buffer, ((PBYTE)functionAddress + cw), 8);
+		buffer[4] = '\0';
+		syscallHash = drunk_md5((char*)buffer);
+		if (drunk_strcmp("15c21cc3c09b43dc6c3d0100e4a6355a", syscallHash) == 0)
+		{
 			BYTE high = *((PBYTE)functionAddress + 5 + cw);
 			BYTE low = *((PBYTE)functionAddress + 4 + cw);
 
@@ -45,16 +54,17 @@ static const BOOL _ExtractFunctionSNN(void* functionAddress, int* pSSN, void** p
 					&& *((PBYTE)functionAddress + cw + x) == 0x05)
 				{
 					PVOID syscallAddr = ((PBYTE)functionAddress + cw + z);
-					//LogString("[HEAVENS HALL] Detected syscall procedure in NTDLL at 0x%p\n", syscallAddr);
 					*pSyscallAddr = syscallAddr;
 					break;
 				}
 			}
 
+			free((void *)syscallHash);
 			return (true);
 		}
 
 		cw++;
+		free((void*)syscallHash);
 	}
 
 	return (false);
@@ -88,7 +98,6 @@ BOOL AXIOM_Prepare_Syscalls()
 
 	// Check that all addresses loaded well
 	if (res == false || image_export_directory == NULL) {
-		printf("GetImageExportDirectory init failure");
 		return (1);
 	}
 
@@ -125,7 +134,6 @@ BOOL AXIOM_Prepare_Syscalls()
 		newEntry->dwHash = drunk_md5(pczFunctionName);
 		newEntry->wSystemCall = SSN;
 		newEntry->wSystemCallAddress = syscallAddr;
-		//printf("Function name at addr %p: (hash: %s) %s with SSN: %d and syscall address: 0x%p\n", pFunctionAddress, newEntry->dwHash, pczFunctionName, newEntry->wSystemCall, newEntry->wSystemCallAddress);
 		AXIOM_AddToAxiomTable(newEntry);
 	}
 	printf("Loaded %d table entries\n", i);
@@ -145,7 +153,6 @@ BOOL AXIOM_InitAxiomTable(PAXIOM_TABLE_ENTRY newEntry)
 
 	AxiomTable = (PAXIOM_TABLE)malloc(sizeof(AXIOM_TABLE));
 	if (AxiomTable == NULL) {
-		printf("HellsTable init failure\n");
 		return (false);
 	}
 	AxiomTable->item = newEntry;
@@ -168,7 +175,6 @@ BOOL AXIOM_AddToAxiomTable(PAXIOM_TABLE_ENTRY newEntry)
 		current = current->next;
 	current->next = (PAXIOM_TABLE)malloc(sizeof(AXIOM_TABLE));
 	if (current->next == NULL) {
-		printf("AddsToTable malloc failure\n");
 		return (false);
 	}
 	current->next->item = newEntry;

