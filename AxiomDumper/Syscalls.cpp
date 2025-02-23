@@ -118,7 +118,7 @@ BOOL AXIOM_Prepare_Syscalls()
 		if (SSN == 0 || syscallAddr == NULL)
 		{
 			if (pczFunctionName[0] == 'N' && pczFunctionName[1] == 't')
-				printf("%s is potentially hooked\n", pczFunctionName);
+				DEBUG_LOG("%s is potentially hooked\n", pczFunctionName);
 			continue;
 		}
 
@@ -136,7 +136,7 @@ BOOL AXIOM_Prepare_Syscalls()
 		newEntry->wSystemCallAddress = syscallAddr;
 		AXIOM_AddToAxiomTable(newEntry);
 	}
-	printf("Loaded %d table entries\n", i);
+	DEBUG_LOG("Loaded %d table entries\n", i);
 	return (true);
 }
 

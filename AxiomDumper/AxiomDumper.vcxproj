@@ -140,6 +140,7 @@
     <ClCompile Include="NetworkEmitter.cpp" />
     <ClCompile Include="ntlib.cpp" />
     <ClCompile Include="PEB_TEB.cpp" />
+    <ClCompile Include="PPcheck.cpp" />
     <ClCompile Include="PrivCheck.cpp" />
     <ClCompile Include="PrivIncrease.cpp" />
     <ClCompile Include="SecretStrBuilder.cpp" />
