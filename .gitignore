@@ -1,0 +1,14 @@
+AxiomDumper.exe
+unxor
+.o
+.o/*
+*.swp
+*.bak
+offsets/Binaries/*.exe
+offsets/Binaries/*.pdb
+offsets/OffsetsVenv/
+offsets/OffsetsVenv/*
+offsets/__pycache__/
+offsets/__pycache__/*
+sys-includes/
+sys-includes/*
