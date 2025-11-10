@@ -12,3 +12,5 @@ offsets/__pycache__/
 offsets/__pycache__/*
 sys-includes/
 sys-includes/*
+out.bin
+out.clear

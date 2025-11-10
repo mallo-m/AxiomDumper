@@ -1,0 +1,20 @@
+CompileFlags:
+  Add:
+    - "-fdeclspec"
+    - "-I./includes"
+    - "-I./../includes"
+    - "-I./../../includes"
+    - "-I./../../../includes"
+    - "-I./sys-includes"
+    - "-I./../sys-includes"
+    - "-I./../../sys-includes"
+    - "-I./../../../sys-includes"
+Diagnostics:
+  Suppress: [
+    "ovl_no_viable_function_in_init",
+    "undeclared_var_use_suggest",
+    "unknown_typename_suggest",
+    "c++11-narrowing",
+    "redefinition_different_typedef",
+    "expected_fn_body"
+  ]
